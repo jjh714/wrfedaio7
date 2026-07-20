@@ -24,7 +24,6 @@ with col2:
             # 걸린 시간 계산 (종료 시간 - 시작 시간)
             st.session_state.result = st.session_state.end_time - st.session_state.start_time
             
-            # [수정된 부분] 계산이 끝나면 시작 시간을 초기화하여 다음 판을 준비합니다.
             st.session_state.start_time = 0 
         else:
             st.warning("시작 버튼을 먼저 눌러주세요!")
