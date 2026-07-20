@@ -10,4 +10,54 @@ def reset_all():
     st.session_state.shoes = "스니커즈"
     st.session_state.acc = []
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 st.button("전체 초기화", on_click=reset_all)
