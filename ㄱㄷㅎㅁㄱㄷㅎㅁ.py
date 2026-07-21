@@ -10,24 +10,14 @@ st.title("📐 방정식 계산기")
 
 st.warning(
     "⚠️ 현재 버전은 y=f(x) 형태의 방정식만 지원합니다.\n\n"
-    "예시: y=2*x+1, y=3cos(x), y=log(x)"
+    "예시: y=2*x+1, y=3*cos(x), y=log(x)"
 )
 
 
 x, y = sp.symbols("x y")
 
 
-# 초기 상태
-if "equation" not in st.session_state:
-    st.session_state.equation = ""
-
-
-if "x_value" not in st.session_state:
-    st.session_state.x_value = 1.0
-
-
-
-# 예시 목록
+# 방정식 목록
 examples = {
     "직접 입력": "",
     "일차함수 y=2*x+1": "y=2*x+1",
@@ -46,7 +36,17 @@ examples = {
 
 
 
-# 선택 메뉴
+# 초기 상태
+if "equation" not in st.session_state:
+    st.session_state.equation = ""
+
+
+if "last_choice" not in st.session_state:
+    st.session_state.last_choice = "직접 입력"
+
+
+
+# 보기 선택
 choice = st.selectbox(
     "예시 방정식 선택",
     list(examples.keys())
@@ -54,16 +54,16 @@ choice = st.selectbox(
 
 
 
-# 선택하면 입력창 변경
-if choice != "직접 입력":
+# 선택이 바뀌었을 때만 입력창 변경
+if choice != st.session_state.last_choice:
 
-    if st.session_state.equation != examples[choice]:
+    st.session_state.equation = examples[choice]
 
-        st.session_state.equation = examples[choice]
+    st.session_state.last_choice = choice
 
 
 
-# 입력창
+# 방정식 입력창
 equation = st.text_input(
     "방정식 입력 (y=f(x) 형태)",
     key="equation"
@@ -71,7 +71,7 @@ equation = st.text_input(
 
 
 
-# 문자 검사
+# 입력 검사
 allowed = "xy0123456789+-*/^=().logsincoqrtab"
 
 
@@ -86,11 +86,10 @@ for c in equation.replace(" ", ""):
 
 
 
-# x 입력
+# x 값
 x_value = st.number_input(
     "대입할 x 값",
-    value=1.0,
-    key="x_value"
+    value=1.0
 )
 
 
@@ -111,7 +110,7 @@ with col2:
 if reset:
 
     st.session_state.equation = ""
-    st.session_state.x_value = 1.0
+    st.session_state.last_choice = "직접 입력"
 
     st.rerun()
 
@@ -130,6 +129,7 @@ if calculate:
             st.stop()
 
 
+
         left, right = equation.split("=")
 
 
@@ -145,7 +145,7 @@ if calculate:
         right = right.replace("^", "**")
 
 
-        # 3cos(x) -> 3*cos(x)
+        # 3cos(x) → 3*cos(x)
         right = re.sub(
             r"(\d)([a-zA-Z])",
             r"\1*\2",
@@ -175,6 +175,7 @@ if calculate:
         st.success(
             f"x={x_value} 일 때 y={result}"
         )
+
 
 
         # 그래프
@@ -214,6 +215,7 @@ if calculate:
 
         ax.legend()
         ax.grid()
+
 
         st.pyplot(fig)
 
