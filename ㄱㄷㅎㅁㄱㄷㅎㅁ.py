@@ -6,51 +6,79 @@ import matplotlib.pyplot as plt
 
 st.title("📐 방정식 계산기")
 
-# 경고 문구
+
 st.warning(
     "⚠️ 현재 버전은 y=f(x) 형태의 방정식만 지원합니다.\n\n"
-    "예시: y=2*x+1, y=x^2, y=log(x)"
+    "예시: y=2*x+1, y=x^2, y=log(x), y=sin(x)"
 )
 
 
 x, y = sp.symbols("x y")
 
 
-# 예시 선택
+# 보기 목록
 example = st.selectbox(
     "예시 방정식 선택",
     [
         "직접 입력",
         "일차함수 y=2*x+1",
-        "이차함수 y=x**2",
-        "로그함수 y=log(x)"
+        "이차함수 y=x^2",
+        "삼차함수 y=x^3",
+        "절댓값 함수 y=abs(x)",
+        "루트 함수 y=sqrt(x)",
+        "로그함수 y=log(x)",
+        "지수함수 y=2^x",
+        "사인 함수 y=sin(x)",
+        "코사인 함수 y=cos(x)",
+        "역비례 함수 y=1/x"
     ]
 )
 
 
-# 선택한 예시 입력
+# 선택한 방정식 자동 입력
 if example == "일차함수 y=2*x+1":
     equation = "y=2*x+1"
 
-elif example == "이차함수 y=x**2":
-    equation = "y=x**2"
+elif example == "이차함수 y=x^2":
+    equation = "y=x^2"
+
+elif example == "삼차함수 y=x^3":
+    equation = "y=x^3"
+
+elif example == "절댓값 함수 y=abs(x)":
+    equation = "y=abs(x)"
+
+elif example == "루트 함수 y=sqrt(x)":
+    equation = "y=sqrt(x)"
 
 elif example == "로그함수 y=log(x)":
     equation = "y=log(x)"
+
+elif example == "지수함수 y=2^x":
+    equation = "y=2^x"
+
+elif example == "사인 함수 y=sin(x)":
+    equation = "y=sin(x)"
+
+elif example == "코사인 함수 y=cos(x)":
+    equation = "y=cos(x)"
+
+elif example == "역비례 함수 y=1/x":
+    equation = "y=1/x"
 
 else:
     equation = ""
 
 
-# 직접 입력창
+# 입력창
 equation = st.text_input(
     "방정식 입력 (y=f(x) 형태)",
     equation
 )
 
 
-# 입력 검사
-allowed = "xy0123456789+-*/^=().log"
+# 허용 문자 검사
+allowed = "xy0123456789+-*/^=().logsincoqrtab"
 
 
 if equation:
@@ -59,8 +87,7 @@ if equation:
 
         if c not in allowed:
             st.error(
-                "❌ 사용할 수 없는 문자가 있습니다. "
-                "x, y와 기본 수식만 입력하세요."
+                "❌ 사용할 수 없는 문자가 있습니다."
             )
             st.stop()
 
@@ -74,14 +101,13 @@ x_value = st.number_input(
 
 
 
-# 계산 버튼
 if st.button("계산하기"):
 
     try:
 
         if "=" not in equation:
             st.error(
-                "❌ = 기호가 필요합니다."
+                "❌ = 기호를 입력하세요."
             )
             st.stop()
 
@@ -89,7 +115,7 @@ if st.button("계산하기"):
         left, right = equation.split("=")
 
 
-        # y=f(x) 확인
+        # y=f(x)만 지원
         if left.strip() != "y":
 
             st.error(
@@ -98,13 +124,13 @@ if st.button("계산하기"):
             st.stop()
 
 
-        # 식 변환
+        # 수식 변환
         expr = sp.sympify(
             right.replace("^", "**")
         )
 
 
-        # 결과 계산
+        # 값 계산
         result = expr.subs(
             x,
             x_value
@@ -116,8 +142,8 @@ if st.button("계산하기"):
         )
 
 
-        # 그래프
-        f = sp.lambdify(
+        # 그래프 생성
+        func = sp.lambdify(
             x,
             expr,
             "numpy"
@@ -127,28 +153,33 @@ if st.button("계산하기"):
         xs = np.linspace(
             -10,
             10,
-            400
+            500
         )
 
 
-        ys = f(xs)
+        ys = func(xs)
 
 
         fig, ax = plt.subplots()
 
+
         ax.plot(
             xs,
             ys,
-            color="blue"
+            color="blue",
+            label=equation
         )
 
 
         ax.scatter(
             [x_value],
             [float(result)],
-            color="red"
+            color="red",
+            label="현재 위치"
         )
 
+
+        ax.legend()
 
         ax.set_xlabel("x")
         ax.set_ylabel("y")
@@ -162,5 +193,5 @@ if st.button("계산하기"):
     except Exception:
 
         st.error(
-            "❌ 방정식을 해석할 수 없습니다."
+            "❌ 방정식을 계산할 수 없습니다."
         )
