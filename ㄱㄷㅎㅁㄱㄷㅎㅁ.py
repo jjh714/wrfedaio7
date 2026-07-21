@@ -1,133 +1,111 @@
 import streamlit as st
+import sympy as sp
+import numpy as np
+import matplotlib.pyplot as plt
 
-# 페이지 설정
-st.set_page_config(
-    page_title="숲속의 동물 인연",
-    page_icon="🐾"
-)
+st.title("📐 방정식 계산기")
 
-# 게임 데이터
-animals = [
-    {
-        "name": "늑대 루루 🐺",
-        "image": "🐺",
-        "story": "깊은 숲에서 길을 잃은 당신 앞에 늑대 루루가 나타났다."
-    },
-    {
-        "name": "고양이 나나 🐱",
-        "image": "🐱",
-        "story": "작은 고양이 나나가 당신의 곁으로 다가왔다."
-    },
-    {
-        "name": "여우 코코 🦊",
-        "image": "🦊",
-        "story": "신비로운 여우 코코가 숲의 비밀을 알려준다."
-    }
-]
+x, y = sp.symbols("x y")
 
 
-# 초기 상태
-if "love" not in st.session_state:
-    st.session_state.love = 0
-
-if "day" not in st.session_state:
-    st.session_state.day = 0
-
-if "animal" not in st.session_state:
-    st.session_state.animal = 0
-
-if "ending" not in st.session_state:
-    st.session_state.ending = ""
-
-
-# 제목
-st.title("🌲 숲속의 동물 인연 🌲")
-st.write("동물 친구와 친해져 최고의 엔딩을 만들어 보세요!")
-
-
-animal = animals[st.session_state.animal]
-
-
-# 캐릭터 표시
-st.markdown(
-    f"""
-    <div style="text-align:center;font-size:100px;">
-    {animal["image"]}
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.subheader(animal["name"])
-st.write(animal["story"])
-
-
-# 상태 표시
-st.info(
-    f"❤️ 호감도 : {st.session_state.love}\n\n"
-    f"📅 만남 횟수 : {st.session_state.day}"
+# 보기 메뉴
+example = st.selectbox(
+    "예시 방정식 선택",
+    [
+        "직접 입력",
+        "일차함수 y=2*x+1",
+        "이차함수 y=x**2",
+        "로그함수 y=log(x)",
+        "원의 방정식 (x-2)^2+(y-1)^2=9"
+    ]
 )
 
 
-# 엔딩 전 선택지
-if st.session_state.ending == "":
+# 예시 자동 입력
+if example == "일차함수 y=2*x+1":
+    equation = "y=2*x+1"
 
-    col1, col2, col3 = st.columns(3)
+elif example == "이차함수 y=x**2":
+    equation = "y=x**2"
 
-    with col1:
-        if st.button("🍎 먹이 주기"):
-            st.session_state.love += 3
-            st.session_state.day += 1
+elif example == "로그함수 y=log(x)":
+    equation = "y=log(x)"
 
-    with col2:
-        if st.button("🎵 노래 불러주기"):
-            st.session_state.love += 2
-            st.session_state.day += 1
+elif example == "원의 방정식 (x-2)^2+(y-1)^2=9":
+    equation = "(x-2)^2+(y-1)^2=9"
 
-    with col3:
-        if st.button("🏃 도망가기"):
-            st.session_state.love -= 2
-            st.session_state.day += 1
+else:
+    equation = ""
 
 
-    # 캐릭터 변경
-    if st.session_state.day == 1:
-        st.session_state.animal = 1
-
-    elif st.session_state.day == 2:
-        st.session_state.animal = 2
+equation = st.text_input(
+    "방정식 입력 (x와 y만 사용 가능)",
+    equation
+)
 
 
-    # 엔딩 판정
-    if st.session_state.day >= 3:
+# 허용 문자 검사
+allowed = "xy0123456789+-*/^=().log"
 
-        if st.session_state.love >= 8:
-            st.session_state.ending = (
-                "💚 해피 엔딩!\n\n"
-                "동물 친구와 평생 함께하게 되었다!"
-            )
+if equation:
+    for c in equation.replace(" ", ""):
+        if c not in allowed:
+            st.error("❌ x와 y를 제외한 문자는 사용할 수 없습니다.")
+            st.stop()
 
-        elif st.session_state.love >= 3:
-            st.session_state.ending = (
-                "🙂 친구 엔딩!\n\n"
-                "숲속에서 계속 만나는 좋은 친구가 되었다."
-            )
+
+# 값 입력
+x_value = st.number_input("x 값 입력", value=1.0)
+
+
+if st.button("계산하기"):
+
+    try:
+        # y=f(x) 형태
+        if "=" in equation:
+
+            left, right = equation.split("=")
+
+            if left.strip() == "y":
+
+                expr = sp.sympify(
+                    right.replace("^", "**")
+                )
+
+                result = expr.subs(x, x_value)
+
+                st.success(
+                    f"x={x_value}일 때 y={result}"
+                )
+
+
+                # 그래프
+                f = sp.lambdify(x, expr, "numpy")
+
+                xs = np.linspace(-10,10,400)
+                ys = f(xs)
+
+                fig, ax = plt.subplots()
+                ax.plot(xs,ys)
+                ax.grid()
+
+                ax.set_xlabel("x")
+                ax.set_ylabel("y")
+
+                st.pyplot(fig)
+
+
+            else:
+                st.info(
+                    "현재 버전은 y=f(x) 형태를 지원합니다."
+                )
+
 
         else:
-            st.session_state.ending = (
-                "💔 배드 엔딩...\n\n"
-                "동물 친구는 조용히 숲으로 돌아갔다."
-            )
+            st.error("= 기호가 필요합니다.")
 
 
-# 엔딩 출력
-else:
-
-    st.success(st.session_state.ending)
-
-    if st.button("🔄 다시 시작"):
-        st.session_state.love = 0
-        st.session_state.day = 0
-        st.session_state.animal = 0
-        st.session_state.ending = ""
-        st.rerun()
+    except Exception as e:
+        st.error(
+            "방정식을 해석할 수 없습니다."
+        )
