@@ -59,3 +59,28 @@ else:
     if st.button("기록 전체 초기화"):
         st.session_state.todo_list = []
         st.rerun()
+
+pg = st.navigation([
+    st.Page(page_motto, title="오늘의 다짐", icon="📣"),
+    st.Page(page_todo, title="오늘의 할 일", icon="✅"),
+    st.Page(page_report, title="나의 갓생 지수", icon="📈")])
+
+st.title("🌱 갓생 살기 플래너">
+pg.run()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
