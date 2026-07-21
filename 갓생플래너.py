@@ -50,8 +50,8 @@ def page_report():
         total = len(st.session_state.todo_list)
         count = 0
         for item in st.session_state.todo_list:
-        if item[1] == True:
-            count += 1
+           if item[1] == True:
+               count += 1
     progress = (count / total) * 100
     st.metric("오늘의 달성률", f"{progress:.1f}%")
     st.progress(progress / 100)
