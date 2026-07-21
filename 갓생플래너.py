@@ -5,13 +5,7 @@ if 'todo_list' not in st.session_state:
 if 'user_motto' not in st.session_state:
     st.session_state.user_motto = "오늘도 화이팅!"
 
-def add_todo(st.title("🌱 갓생 살기 플래너")
-st.header("📣 1. 오늘의 다짐")
-motto = st.text_input("나의 한 줄 좌우명을 적어주세요")
-if st.button("다짐 저장"):
-    st.session_state.user_motto = motto
-    st.success("좌우명이 등록되었습니다!")
-st.markdown("---")):
+def add_todo():
     task = st.session_state.todo_input
     if task:
         st.session_state.todo_list.append([task, False])
