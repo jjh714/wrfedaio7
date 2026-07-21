@@ -89,7 +89,7 @@ def page_ai_coach():
     if "messages" not in st.session_state:
         st.session_state.messages = [
             ("role": "system", "content": "너는 사용사의 할 일 목록과 노를 분석하여 소인하는 불상적인 고지야.
-            사용자가 더 멋진 삶을 살 수 있도록 명확한 조언과 응원해줘."}
+            사용자가 더 멋진 삶을 살 수 있도록 명확한 조언과 응원해줘.")
          ]
     prompt = st.text_input("질문을 입력하세요")
     if st.button("보내기"):
