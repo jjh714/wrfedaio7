@@ -17,24 +17,24 @@ st.warning(
 x, y = sp.symbols("x y")
 
 
-# -----------------------
-# 초기 상태
-# -----------------------
+# =====================
+# 상태 저장
+# =====================
 
-if "equation" not in st.session_state:
-    st.session_state.equation = ""
+if "equation_key" not in st.session_state:
+    st.session_state.equation_key = 0
+
+if "equation_value" not in st.session_state:
+    st.session_state.equation_value = ""
 
 if "last_choice" not in st.session_state:
     st.session_state.last_choice = "직접 입력"
 
-if "reset" not in st.session_state:
-    st.session_state.reset = False
 
 
-
-# -----------------------
-# 예시 방정식 목록
-# -----------------------
+# =====================
+# 예시 방정식
+# =====================
 
 examples = {
     "직접 입력": "",
@@ -54,21 +54,9 @@ examples = {
 
 
 
-# -----------------------
-# 초기화 처리
-# -----------------------
-
-if st.session_state.reset:
-
-    st.session_state.equation = ""
-
-    st.session_state.reset = False
-
-
-
-# -----------------------
+# =====================
 # 보기 선택
-# -----------------------
+# =====================
 
 choice = st.selectbox(
     "예시 방정식 선택",
@@ -76,30 +64,29 @@ choice = st.selectbox(
 )
 
 
-
-# 선택 변경 감지
 if choice != st.session_state.last_choice:
 
-    st.session_state.equation = examples[choice]
+    st.session_state.equation_value = examples[choice]
 
     st.session_state.last_choice = choice
 
 
 
-# -----------------------
+# =====================
 # 입력창
-# -----------------------
+# =====================
 
 equation = st.text_input(
     "방정식 입력 (y=f(x) 형태)",
-    key="equation"
+    value=st.session_state.equation_value,
+    key=f"equation_{st.session_state.equation_key}"
 )
 
 
 
-# -----------------------
-# 문자 검사
-# -----------------------
+# =====================
+# 입력 검사
+# =====================
 
 allowed = "xy0123456789+-*/^=().logsincoqrtab"
 
@@ -116,9 +103,9 @@ for c in equation.replace(" ", ""):
 
 
 
-# -----------------------
-# x 입력
-# -----------------------
+# =====================
+# x 값
+# =====================
 
 x_value = st.number_input(
     "대입할 x 값",
@@ -127,9 +114,9 @@ x_value = st.number_input(
 
 
 
-# -----------------------
+# =====================
 # 버튼
-# -----------------------
+# =====================
 
 col1, col2 = st.columns(2)
 
@@ -139,14 +126,19 @@ with col1:
 
 
 with col2:
-    reset_button = st.button("🔄 초기화")
+    reset = st.button("🔄 초기화")
 
 
 
-# 초기화 버튼
-if reset_button:
+# =====================
+# 초기화
+# =====================
 
-    st.session_state.reset = True
+if reset:
+
+    st.session_state.equation_key += 1
+
+    st.session_state.equation_value = ""
 
     st.session_state.last_choice = "직접 입력"
 
@@ -154,9 +146,9 @@ if reset_button:
 
 
 
-# -----------------------
+# =====================
 # 계산
-# -----------------------
+# =====================
 
 if calculate:
 
@@ -186,12 +178,12 @@ if calculate:
 
 
 
-        # ^ → **
+        # 제곱 처리
         right = right.replace("^", "**")
 
 
 
-        # 3cos(x) → 3*cos(x)
+        # 3cos(x) -> 3*cos(x)
         right = re.sub(
             r"(\d)([a-zA-Z])",
             r"\1*\2",
@@ -227,9 +219,9 @@ if calculate:
 
 
 
-        # -----------------------
+        # =====================
         # 그래프
-        # -----------------------
+        # =====================
 
         func = sp.lambdify(
             x,
@@ -275,7 +267,6 @@ if calculate:
         ax.set_xlabel("x")
 
         ax.set_ylabel("y")
-
 
 
         st.pyplot(fig)
