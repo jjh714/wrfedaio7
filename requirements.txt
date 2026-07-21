@@ -1,2 +1,1 @@
-openai
-streamlit
+pip install streamlit sympy matplotlib numpy
