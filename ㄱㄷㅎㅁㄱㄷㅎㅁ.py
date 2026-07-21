@@ -2,6 +2,7 @@ import streamlit as st
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
+import re
 
 
 st.title("📐 방정식 계산기")
@@ -9,11 +10,21 @@ st.title("📐 방정식 계산기")
 
 st.warning(
     "⚠️ 현재 버전은 y=f(x) 형태의 방정식만 지원합니다.\n\n"
-    "예시: y=2*x+1, y=x^2, y=log(x), y=sin(x)"
+    "예시: y=2*x+1, y=3cos(x), y=log(x)"
 )
 
 
+# 초기값 저장
+if "equation" not in st.session_state:
+    st.session_state.equation = ""
+
+if "x_value" not in st.session_state:
+    st.session_state.x_value = 1.0
+
+
+
 x, y = sp.symbols("x y")
+
 
 
 # 보기 목록
@@ -30,12 +41,15 @@ example = st.selectbox(
         "지수함수 y=2^x",
         "사인 함수 y=sin(x)",
         "코사인 함수 y=cos(x)",
-        "역비례 함수 y=1/x"
+        "탄젠트 함수 y=tan(x)",
+        "역비례 함수 y=1/x",
+        "삼각함수 계수 예시 y=3*cos(x)"
     ]
 )
 
 
-# 선택한 방정식 자동 입력
+
+# 보기 선택 시 자동 입력
 if example == "일차함수 y=2*x+1":
     equation = "y=2*x+1"
 
@@ -63,22 +77,32 @@ elif example == "사인 함수 y=sin(x)":
 elif example == "코사인 함수 y=cos(x)":
     equation = "y=cos(x)"
 
+elif example == "탄젠트 함수 y=tan(x)":
+    equation = "y=tan(x)"
+
 elif example == "역비례 함수 y=1/x":
     equation = "y=1/x"
+
+elif example == "삼각함수 계수 예시 y=3*cos(x)":
+    equation = "y=3*cos(x)"
 
 else:
     equation = ""
 
 
+
 # 입력창
 equation = st.text_input(
     "방정식 입력 (y=f(x) 형태)",
-    equation
+    equation,
+    key="equation"
 )
+
 
 
 # 허용 문자 검사
 allowed = "xy0123456789+-*/^=().logsincoqrtab"
+
 
 
 if equation:
@@ -93,29 +117,59 @@ if equation:
 
 
 
-# x 값 입력
+# x 입력
 x_value = st.number_input(
     "대입할 x 값",
-    value=1.0
+    value=1.0,
+    key="x_value"
 )
 
 
 
-if st.button("계산하기"):
+# 버튼 배치
+col1, col2 = st.columns(2)
+
+
+
+with col1:
+
+    calculate = st.button("🧮 계산하기")
+
+
+with col2:
+
+    reset = st.button("🔄 초기화")
+
+
+
+# 초기화
+if reset:
+
+    st.session_state.equation = ""
+    st.session_state.x_value = 1.0
+
+    st.rerun()
+
+
+
+# 계산
+if calculate:
 
     try:
 
         if "=" not in equation:
+
             st.error(
-                "❌ = 기호를 입력하세요."
+                "❌ = 기호가 필요합니다."
             )
             st.stop()
+
 
 
         left, right = equation.split("=")
 
 
-        # y=f(x)만 지원
+
         if left.strip() != "y":
 
             st.error(
@@ -124,17 +178,39 @@ if st.button("계산하기"):
             st.stop()
 
 
-        # 수식 변환
-        expr = sp.sympify(
-            right.replace("^", "**")
+
+        # ^ 변환
+        right = right.replace("^", "**")
+
+
+        # 3cos(x) -> 3*cos(x)
+        right = re.sub(
+            r"(\d)([a-zA-Z])",
+            r"\1*\2",
+            right
         )
 
 
-        # 값 계산
+
+        expr = sp.sympify(
+            right,
+            locals={
+                "sin": sp.sin,
+                "cos": sp.cos,
+                "tan": sp.tan,
+                "log": sp.log,
+                "sqrt": sp.sqrt,
+                "abs": sp.Abs
+            }
+        )
+
+
+
         result = expr.subs(
             x,
             x_value
         )
+
 
 
         st.success(
@@ -142,7 +218,8 @@ if st.button("계산하기"):
         )
 
 
-        # 그래프 생성
+
+        # 그래프
         func = sp.lambdify(
             x,
             expr,
@@ -160,14 +237,15 @@ if st.button("계산하기"):
         ys = func(xs)
 
 
+
         fig, ax = plt.subplots()
 
 
         ax.plot(
             xs,
             ys,
-            color="blue",
-            label=equation
+            label=equation,
+            color="blue"
         )
 
 
@@ -181,16 +259,17 @@ if st.button("계산하기"):
 
         ax.legend()
 
+        ax.grid()
+
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-
-        ax.grid()
 
 
         st.pyplot(fig)
 
 
-    except Exception:
+
+    except Exception as e:
 
         st.error(
             "❌ 방정식을 계산할 수 없습니다."
