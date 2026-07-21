@@ -47,9 +47,9 @@ def page_report():
     if not st.session_state.todo_list:
         st.write("아직 등록된 할 일이 없습니다.")
     else:
-    total = len(st.session_state.todo_list)
-    count = 0
-    for item in st.session_state.todo_list:
+        total = len(st.session_state.todo_list)
+        count = 0
+        for item in st.session_state.todo_list:
         if item[1] == True:
             count += 1
     progress = (count / total) * 100
