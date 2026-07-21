@@ -88,7 +88,7 @@ def page_ai_coach():
             with st.chat_message(message["role"]):
                 st.markdown (message ["content"])
 question = st.chat_input("질문을 입력하세요")
-    if question:
+if question:
         st.session_state.messages.append({"role": "user", "content": question})
         with st.chat_message("user"):
             st.markdown(question)
