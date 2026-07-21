@@ -1,174 +1,133 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<title>동물 미연시 - 숲속의 인연</title>
+import streamlit as st
 
-<style>
-body {
-    background:#f5ffe8;
-    font-family: "Arial", sans-serif;
-    text-align:center;
-}
+# 페이지 설정
+st.set_page_config(
+    page_title="숲속의 동물 인연",
+    page_icon="🐾"
+)
 
-#game {
-    width:500px;
-    margin:50px auto;
-    background:white;
-    padding:30px;
-    border-radius:20px;
-    box-shadow:0 0 20px #aaa;
-}
-
-button {
-    padding:12px 20px;
-    margin:10px;
-    border:none;
-    border-radius:10px;
-    background:#79c267;
-    color:white;
-    cursor:pointer;
-}
-
-button:hover {
-    background:#4f9d43;
-}
-
-#animal {
-    font-size:80px;
-}
-
-</style>
-</head>
-
-<body>
-
-<div id="game">
-
-<h1>🌲 숲속의 인연 🌲</h1>
-
-<div id="animal">🐺</div>
-
-<h2 id="name">늑대 루루</h2>
-
-<p id="story">
-깊은 숲에서 길을 잃은 당신은 신비로운 늑대를 만났다.
-</p>
-
-<p>
-호감도 : <span id="love">0</span>
-</p>
-
-<button onclick="choice(1)">🍎 먹이를 준다</button>
-<button onclick="choice(2)">🎵 노래를 불러준다</button>
-<button onclick="choice(3)">🏃 도망간다</button>
-
-<h3 id="result"></h3>
-
-</div>
-
-
-<script>
-
-let love = 0;
-let day = 0;
-
-const events = [
-[
-"🐺",
-"늑대 루루",
-"루루가 꼬리를 흔들며 다가왔다.",
-[3,2,-2]
-],
-
-[
-"🐱",
-"고양이 나나",
-"길고양이 나나가 당신의 손 냄새를 맡는다.",
-[2,3,-1]
-],
-
-[
-"🦊",
-"여우 코코",
-"여우 코코가 숲의 비밀을 알려준다.",
-[4,1,-3]
+# 게임 데이터
+animals = [
+    {
+        "name": "늑대 루루 🐺",
+        "image": "🐺",
+        "story": "깊은 숲에서 길을 잃은 당신 앞에 늑대 루루가 나타났다."
+    },
+    {
+        "name": "고양이 나나 🐱",
+        "image": "🐱",
+        "story": "작은 고양이 나나가 당신의 곁으로 다가왔다."
+    },
+    {
+        "name": "여우 코코 🦊",
+        "image": "🦊",
+        "story": "신비로운 여우 코코가 숲의 비밀을 알려준다."
+    }
 ]
-];
 
 
-let animalIndex = 0;
+# 초기 상태
+if "love" not in st.session_state:
+    st.session_state.love = 0
+
+if "day" not in st.session_state:
+    st.session_state.day = 0
+
+if "animal" not in st.session_state:
+    st.session_state.animal = 0
+
+if "ending" not in st.session_state:
+    st.session_state.ending = ""
 
 
-function choice(num){
-
-let gain = events[animalIndex][3][num-1];
-
-love += gain;
-day++;
-
-document.getElementById("love").innerText = love;
-
-document.getElementById("story").innerText =
-"당신의 선택에 동물이 반응했다!";
+# 제목
+st.title("🌲 숲속의 동물 인연 🌲")
+st.write("동물 친구와 친해져 최고의 엔딩을 만들어 보세요!")
 
 
-if(day >= 3){
-ending();
-}
-
-else if(day == 1){
-changeAnimal(1);
-}
-
-else if(day == 2){
-changeAnimal(2);
-}
-
-}
+animal = animals[st.session_state.animal]
 
 
-function changeAnimal(index){
+# 캐릭터 표시
+st.markdown(
+    f"""
+    <div style="text-align:center;font-size:100px;">
+    {animal["image"]}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-animalIndex=index;
-
-document.getElementById("animal").innerText =
-events[index][0];
-
-document.getElementById("name").innerText =
-events[index][1];
-
-document.getElementById("story").innerText =
-events[index][2];
-
-}
+st.subheader(animal["name"])
+st.write(animal["story"])
 
 
-function ending(){
-
-let text="";
-
-if(love>=8){
-text="💚 해피 엔딩!\n동물 친구가 평생의 파트너가 되었다!";
-}
-
-else if(love>=3){
-text="🙂 좋은 친구 엔딩!\n숲속에서 계속 만나는 사이가 되었다.";
-}
-
-else{
-text="💔 이별 엔딩...\n동물은 조용히 숲으로 돌아갔다.";
-}
+# 상태 표시
+st.info(
+    f"❤️ 호감도 : {st.session_state.love}\n\n"
+    f"📅 만남 횟수 : {st.session_state.day}"
+)
 
 
-document.getElementById("result").innerText=text;
+# 엔딩 전 선택지
+if st.session_state.ending == "":
 
-document.querySelectorAll("button")
-.forEach(b=>b.disabled=true);
+    col1, col2, col3 = st.columns(3)
 
-}
+    with col1:
+        if st.button("🍎 먹이 주기"):
+            st.session_state.love += 3
+            st.session_state.day += 1
 
-</script>
+    with col2:
+        if st.button("🎵 노래 불러주기"):
+            st.session_state.love += 2
+            st.session_state.day += 1
 
-</body>
-</html>
+    with col3:
+        if st.button("🏃 도망가기"):
+            st.session_state.love -= 2
+            st.session_state.day += 1
+
+
+    # 캐릭터 변경
+    if st.session_state.day == 1:
+        st.session_state.animal = 1
+
+    elif st.session_state.day == 2:
+        st.session_state.animal = 2
+
+
+    # 엔딩 판정
+    if st.session_state.day >= 3:
+
+        if st.session_state.love >= 8:
+            st.session_state.ending = (
+                "💚 해피 엔딩!\n\n"
+                "동물 친구와 평생 함께하게 되었다!"
+            )
+
+        elif st.session_state.love >= 3:
+            st.session_state.ending = (
+                "🙂 친구 엔딩!\n\n"
+                "숲속에서 계속 만나는 좋은 친구가 되었다."
+            )
+
+        else:
+            st.session_state.ending = (
+                "💔 배드 엔딩...\n\n"
+                "동물 친구는 조용히 숲으로 돌아갔다."
+            )
+
+
+# 엔딩 출력
+else:
+
+    st.success(st.session_state.ending)
+
+    if st.button("🔄 다시 시작"):
+        st.session_state.love = 0
+        st.session_state.day = 0
+        st.session_state.animal = 0
+        st.session_state.ending = ""
+        st.rerun()
