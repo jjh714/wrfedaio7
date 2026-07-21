@@ -17,7 +17,25 @@ st.warning(
 x, y = sp.symbols("x y")
 
 
-# 방정식 목록
+# -----------------------
+# 초기 상태
+# -----------------------
+
+if "equation" not in st.session_state:
+    st.session_state.equation = ""
+
+if "last_choice" not in st.session_state:
+    st.session_state.last_choice = "직접 입력"
+
+if "reset" not in st.session_state:
+    st.session_state.reset = False
+
+
+
+# -----------------------
+# 예시 방정식 목록
+# -----------------------
+
 examples = {
     "직접 입력": "",
     "일차함수 y=2*x+1": "y=2*x+1",
@@ -36,17 +54,22 @@ examples = {
 
 
 
-# 초기 상태
-if "equation" not in st.session_state:
+# -----------------------
+# 초기화 처리
+# -----------------------
+
+if st.session_state.reset:
+
     st.session_state.equation = ""
 
-
-if "last_choice" not in st.session_state:
-    st.session_state.last_choice = "직접 입력"
+    st.session_state.reset = False
 
 
 
+# -----------------------
 # 보기 선택
+# -----------------------
+
 choice = st.selectbox(
     "예시 방정식 선택",
     list(examples.keys())
@@ -54,7 +77,7 @@ choice = st.selectbox(
 
 
 
-# 선택이 바뀌었을 때만 입력창 변경
+# 선택 변경 감지
 if choice != st.session_state.last_choice:
 
     st.session_state.equation = examples[choice]
@@ -63,7 +86,10 @@ if choice != st.session_state.last_choice:
 
 
 
-# 방정식 입력창
+# -----------------------
+# 입력창
+# -----------------------
+
 equation = st.text_input(
     "방정식 입력 (y=f(x) 형태)",
     key="equation"
@@ -71,7 +97,10 @@ equation = st.text_input(
 
 
 
-# 입력 검사
+# -----------------------
+# 문자 검사
+# -----------------------
+
 allowed = "xy0123456789+-*/^=().logsincoqrtab"
 
 
@@ -82,17 +111,25 @@ for c in equation.replace(" ", ""):
         st.error(
             "❌ 사용할 수 없는 문자가 있습니다."
         )
+
         st.stop()
 
 
 
-# x 값
+# -----------------------
+# x 입력
+# -----------------------
+
 x_value = st.number_input(
     "대입할 x 값",
     value=1.0
 )
 
 
+
+# -----------------------
+# 버튼
+# -----------------------
 
 col1, col2 = st.columns(2)
 
@@ -102,21 +139,25 @@ with col1:
 
 
 with col2:
-    reset = st.button("🔄 초기화")
+    reset_button = st.button("🔄 초기화")
 
 
 
-# 초기화
-if reset:
+# 초기화 버튼
+if reset_button:
 
-    st.session_state.equation = ""
+    st.session_state.reset = True
+
     st.session_state.last_choice = "직접 입력"
 
     st.rerun()
 
 
 
+# -----------------------
 # 계산
+# -----------------------
+
 if calculate:
 
     try:
@@ -126,6 +167,7 @@ if calculate:
             st.error(
                 "❌ = 기호가 필요합니다."
             )
+
             st.stop()
 
 
@@ -133,16 +175,20 @@ if calculate:
         left, right = equation.split("=")
 
 
+
         if left.strip() != "y":
 
             st.error(
                 "❌ 현재 버전은 y=f(x) 형태만 지원합니다."
             )
+
             st.stop()
 
 
 
+        # ^ → **
         right = right.replace("^", "**")
+
 
 
         # 3cos(x) → 3*cos(x)
@@ -151,6 +197,7 @@ if calculate:
             r"\1*\2",
             right
         )
+
 
 
         expr = sp.sympify(
@@ -166,10 +213,12 @@ if calculate:
         )
 
 
+
         result = expr.subs(
             x,
             x_value
         )
+
 
 
         st.success(
@@ -178,7 +227,10 @@ if calculate:
 
 
 
+        # -----------------------
         # 그래프
+        # -----------------------
+
         func = sp.lambdify(
             x,
             expr,
@@ -196,12 +248,14 @@ if calculate:
         ys = func(xs)
 
 
+
         fig, ax = plt.subplots()
 
 
         ax.plot(
             xs,
             ys,
+            color="blue",
             label=equation
         )
 
@@ -209,12 +263,19 @@ if calculate:
         ax.scatter(
             [x_value],
             [float(result)],
-            color="red"
+            color="red",
+            label="현재 위치"
         )
 
 
         ax.legend()
+
         ax.grid()
+
+        ax.set_xlabel("x")
+
+        ax.set_ylabel("y")
+
 
 
         st.pyplot(fig)
