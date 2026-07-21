@@ -1,7 +1,6 @@
 import streamlit as st
 
-streamlit
-openai
+from openai import OpenAI
 ai_client = OpenAI (api_key=st.secrets["OPENΑΙ_ΑΡΙ_KEY"])
 
 if 'todo_list' not in st.session_state:
