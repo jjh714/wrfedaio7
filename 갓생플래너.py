@@ -25,7 +25,7 @@ def page_todo():
     st.write(f"현재 다짐: **{st.session_state.user_motto}**")
     new_todo = st.text_input("추가할 할 일을 입력하세요", key="todo_input")
     st.button("추가하기", on_click=add_todo)
-if new_todo == "":
+    if new_todo == "":
        st.warning("할 일을 입력하고 버튼을 눌러주세요!")
 
 st.markdown("---")
