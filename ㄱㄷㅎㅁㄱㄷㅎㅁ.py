@@ -1,62 +1,66 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
-st.set_page_config(page_title="점프하는 공룡", page_icon="🦖")
+st.title("🦖 방향키로 움직이는 공룡")
 
-st.title("🦖 점프하는 공룡")
-st.write("버튼을 누르면 공룡이 점프하며 달립니다!")
+components.html("""
+<!DOCTYPE html>
+<html>
+<body style="margin:0; overflow:hidden;">
+<div id="game" style="
+width:800px;
+height:400px;
+background:#87CEEB;
+border:2px solid black;
+position:relative;
+overflow:hidden;
+">
 
-if st.button("공룡 출발!"):
-    st.balloons()
+<div id="ground"
+style="
+position:absolute;
+bottom:0;
+width:100%;
+height:40px;
+background:green;">
+</div>
 
-    st.markdown("""
-    <style>
-    .stage {
-        position: relative;
-        width: 100%;
-        height: 220px;
-        overflow: hidden;
-        background: linear-gradient(#87CEEB 75%, #7CFC00 75%);
-        border-radius: 10px;
-        border: 2px solid #888;
-    }
+<div id="dino"
+style="
+position:absolute;
+left:100px;
+bottom:40px;
+font-size:60px;">
+🦖
+</div>
 
-    .ground {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 8px;
-        background: green;
-    }
+</div>
 
-    .dino {
-        position: absolute;
-        left: -80px;
-        bottom: 8px;
-        font-size: 70px;
-        animation:
-            run 8s linear forwards,
-            jump 0.7s ease-in-out infinite;
-    }
+<script>
+const dino = document.getElementById("dino");
 
-    @keyframes run {
-        from { left: -80px; }
-        to   { left: 105%; }
-    }
+let x = 100;
+let y = 40;
 
-    @keyframes jump {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-70px);
-        }
-    }
-    </style>
+document.addEventListener("keydown", function(e){
 
-    <div class="stage">
-        <div class="dino">🦖</div>
-        <div class="ground"></div>
-    </div>
-    """, unsafe_allow_html=True)
+    if(e.key=="ArrowRight") x += 10;
+    if(e.key=="ArrowLeft") x -= 10;
+    if(e.key=="ArrowUp") y += 10;
+    if(e.key=="ArrowDown") y -= 10;
 
-    st.success("공룡이 점프하며 달리고 있습니다! 🦖")
+    if(x<0) x=0;
+    if(x>730) x=730;
+
+    if(y<40) y=40;
+    if(y>300) y=300;
+
+    dino.style.left=x+"px";
+    dino.style.bottom=y+"px";
+
+});
+</script>
+
+</body>
+</html>
+""", height=430)
